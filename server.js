@@ -7,13 +7,37 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// Middleware with explicit CORS configuration
+app.use(cors({
+  origin: '*', // Allow all origins for now
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: false
+}));
+
 app.use(express.json({ limit: '10mb' }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Health check endpoint
 app.get('/', (req, res) => {
-  res.json({ message: 'Listicle Generator API is running!' });
+  res.json({ 
+    message: 'Listicle Generator API is running!',
+    timestamp: new Date().toISOString(),
+    endpoints: [
+      'GET / - Health check',
+      'POST /api/generate-listicle - Generate listicle content'
+    ]
+  });
+});
+
+// Test endpoint to check CORS
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'CORS test successful!',
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Main listicle generation endpoint
